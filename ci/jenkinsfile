@@ -9,16 +9,22 @@ pipeline{
                 sh 'npm run-script test'
                 echo 'Stashing'
                 stash includes: 'public/**/*', name: 'build'
-                echo 'Publishing jUnit'
-                junit '**/TESTS-PhantomJS*'
-                echo 'Archiving artifacts'
-                archiveArtifacts 'public/**/*'
-            }
+            }               
+            post{
+                always{
+                    echo 'Publishing jUnit'
+                    junit '**/TESTS-PhantomJS*'
+                }
+                success{
+                    echo 'Archiving artifacts'
+                    archiveArtifacts 'public/**/*'
+                }
+}
         }
         stage("Deploy"){
             steps{
                 echo 'Copying artifacts'
-                copyArtifacts(projectName: 'drum-machine-pipeline', target: 'build', selector: lastSuccessful)
+                copyArtifacts(projectName: 'drum-machine-pipeline', target: 'build')
                 sshPublisher(publishers: [sshPublisherDesc(configName: 'local-docker', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/', remoteDirectorySDF: false, removePrefix: 'build/public', sourceFiles: 'build/public/**/*')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
             }
         }
