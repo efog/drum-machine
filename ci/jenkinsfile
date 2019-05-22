@@ -19,12 +19,13 @@ pipeline{
                     echo 'Archiving artifacts'
                     archiveArtifacts 'public/**/*'
                 }
-}
+            }
         }
         stage("Deploy"){
             steps{
                 echo 'Copying artifacts'
                 copyArtifacts(projectName: 'drum-machine-pipeline', target: 'build')
+                echo 'Publishing artifacts'
                 sshPublisher(publishers: [sshPublisherDesc(configName: 'local-docker', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/', remoteDirectorySDF: false, removePrefix: 'build/public', sourceFiles: 'build/public/**/*')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
             }
         }
