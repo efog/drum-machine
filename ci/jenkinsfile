@@ -15,6 +15,7 @@ pipeline{
         }
         stage("Deploy"){
             steps{
+                echo 'Copying artifacts'
                 copyArtifacts(projectName: 'drum-machine-pipeline', target: 'build', selector: lastSuccessful)
                 sshPublisher(publishers: [sshPublisherDesc(configName: 'local-docker', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/', remoteDirectorySDF: false, removePrefix: 'build/public', sourceFiles: 'build/public/**/*')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
             }
