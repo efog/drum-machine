@@ -4,6 +4,7 @@ pipeline{
         stage("Build"){
             steps{
                 sh 'npm install && npm run-script build && npm run-script test'
+                stash includes: 'pulic/**/*', name: 'build'
             }
             post{
                 always{
@@ -16,34 +17,13 @@ pipeline{
         }
         stage("Deploy"){
             steps{
-                echo "========executing A========"
-            }
-            post{
-                always{
-                    echo "========always========"
-                }
-                success{
-                    echo "========A executed successfully========"
-                }
-                failure{
-                    echo "========A execution failed========"
-                }
+                copyArtifacts(projectName: 'drum-machine-pipeline', target: 'build', selector: 'lastSuccessful')
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'local-docker', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/', remoteDirectorySDF: false, removePrefix: 'build/public', sourceFiles: 'build/public/**/*')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
             }
         }
         stage("Test"){
             steps{
-                echo "========executing A========"
-            }
-            post{
-                always{
-                    echo "========always========"
-                }
-                success{
-                    echo "========A executed successfully========"
-                }
-                failure{
-                    echo "========A execution failed========"
-                }
+                sh 'curl 127.0.0.1:8081'
             }
         }
     }
