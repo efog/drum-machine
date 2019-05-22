@@ -3,14 +3,14 @@ pipeline{
     stages{
         stage("Build"){
             steps{
+                echo 'Building'
                 sh 'npm install && npm run-script build && npm run-script test'
+                echo 'Stashing'
                 stash includes: 'pulic/**/*', name: 'build'
+                echo 'Publishing jUnit'
+                junit 'tests-results/*.xml'
+                echo 'Archiving artifacts'
                 archiveArtifacts 'public/**/*'
-            }
-            post{
-                always{
-                    junit 'tests-results/*.xml'
-                }
             }
         }
         stage("Deploy"){
